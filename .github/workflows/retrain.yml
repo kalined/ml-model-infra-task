@@ -21,13 +21,12 @@ jobs:
 
           pip install -r requirements.txt
 
-          pip install notebook
+          pip install notebook papermill 
 
       - name: Execute notebook
         run: |
-          jupyter nbconvert \
-            --to notebook \
-            --execute notebook-mnist.ipynb \
-            --ExecutePreprocessor.timeout=600 \
-            --output retrained.ipynb
+          papermill \
+            notebook-mnist.ipynb \
+            retrained.ipynb \
+            --log-output
         shell: bash
