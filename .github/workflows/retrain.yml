@@ -21,6 +21,13 @@ jobs:
 
           pip install -r requirements.txt
 
-      - name: Execute notebook (retrain model)
-        run: jupyter execute notebook-mnist.ipynb
+          pip install notebook
+
+      - name: Execute notebook
+        run: |
+          jupyter nbconvert \
+            --to notebook \
+            --execute notebook-mnist.ipynb \
+            --ExecutePreprocessor.timeout=600 \
+            --output retrained.ipynb
         shell: bash
