@@ -2,9 +2,16 @@ name: Retrain MNIST Model
 
 on:
   workflow_dispatch:
-
+    inputs:
+      week:
+        description: 'Which week directory to train on?'
+        required: true
+        default: 'week 1'
 jobs:
   retrain:
+    env:
+      WEEK: ${{ github.event.inputs.week }}
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -23,7 +30,7 @@ jobs:
 
           pip install notebook papermill 
 
-      - name: Execute notebook
+      - name: Execute notebook ${{ github.event.inputs.week }}
         run: |
           papermill \
             notebook-mnist.ipynb \
