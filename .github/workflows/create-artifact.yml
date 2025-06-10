@@ -1,0 +1,16 @@
+name: Upload Artifact
+
+on:
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload images artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mnist_images
+          path: ./mnist_images/weeks/mnist-images.tar.gz
