@@ -1,4 +1,5 @@
-name: Retrain MNIST Model
+name: Train MNIST Model Manually
+# This workflow trains the MNIST model using the notebook and the images artifact.
 
 on:
   pull_request:
@@ -12,7 +13,7 @@ on:
         required: true
         default: 'week 1'
 jobs:
-  retrain:
+  train:
     env:
       WEEK: ${{ github.event.inputs.week }}
 
