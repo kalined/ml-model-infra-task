@@ -27,12 +27,11 @@ jobs:
           name: mnist_images
           github-token: ${{ secrets.GH_PAT }}
           run-id: 15559336158
-          path: ./mnist_images/weeks
+          path: .
 
       - name: Unpack images
         run: |
           ls -la
-          tar -xf ./mnist_images/weeks/mnist-images.tar -C /week\ 1/
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
