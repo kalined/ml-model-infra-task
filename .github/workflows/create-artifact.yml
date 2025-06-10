@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Upload images artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mnist_images
           path: ./mnist_images/weeks/mnist-images.tar.gz
