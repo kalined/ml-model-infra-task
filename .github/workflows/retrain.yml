@@ -25,6 +25,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: mnist_images
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: 15559336158
           path: ./mnist_images/weeks
 
       - name: Unpack images
