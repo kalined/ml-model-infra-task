@@ -2,9 +2,9 @@ name: Retrain MNIST Model
 
 on:
   pull_request:
-    paths:
-      - 'notebook-mnist.ipynb'
-      - 'mnist_model/**'
+#    paths:
+#      - 'notebook-mnist.ipynb'
+#      - 'mnist_model/**'
 
 jobs:
   retrain:
