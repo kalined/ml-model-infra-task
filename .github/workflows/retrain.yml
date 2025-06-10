@@ -31,7 +31,7 @@ jobs:
         run: |
           rm -f "./mnist_images/weeks/${{ env.WEEK }}/.gitkeep"
 
-          tar "--strip-components=1 -xf ./mnist_images/weeks/${{ env.WEEK }}/mnist-images.tar.gz -C ./mnist_images/weeks/${{ env.WEEK }}/"
+          tar --strip-components=1 -xf "./mnist_images/weeks/${{ env.WEEK }}/mnist-images.tar.gz" -C "./mnist_images/weeks/${{ env.WEEK }}/"
 
           echo "Contents of ./mnist_images/weeks/${{ env.WEEK }}/ after extraction:"
           ls -la "./mnist_images/weeks/${{ env.WEEK }}/"
