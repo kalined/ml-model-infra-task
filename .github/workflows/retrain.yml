@@ -32,7 +32,11 @@ jobs:
       - name: Unpack images
         run: |
           ls -la
-          tar -xf mnist-images.tar.gz -C ./mnist_images/weeks/week\ 1/
+
+          rm -f ./mnist_images/weeks/week\ 1/.gitkeep
+
+          tar --strip-components=1 -xf mnist-images.tar.gz -C ./mnist_images/weeks/week\ 1/
+
           ls -la ./mnist_images/weeks/week\ 1/
       - name: Set up Python
         uses: actions/setup-python@v4
