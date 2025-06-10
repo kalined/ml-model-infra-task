@@ -1,6 +1,10 @@
 name: Retrain MNIST Model
 
 on:
+  pull_request:
+    paths:
+      - 'notebook-mnist.ipynb'
+      - 'mnist_model/**'
   workflow_dispatch:
     inputs:
       week:
@@ -17,6 +21,16 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Download MNIST images artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mnist_images
+          path: ./mnist_images/weeks
+
+      - name: Unpack images
+        run: |
+          ls -la
+          tar -xf ./mnist_images/weeks/mnist-images.tar -C /week\ 1/
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
