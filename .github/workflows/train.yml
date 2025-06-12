@@ -64,4 +64,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mnist_model_production
-          path: ./supported_model/mnist_model_prod.h5
+          path: ./supported_model/mnist_model.h5
