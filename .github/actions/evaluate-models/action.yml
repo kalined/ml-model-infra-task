@@ -1,0 +1,43 @@
+name: Evaluate Models
+description: Compare the accuracy of the new model and the production model
+
+inputs:
+  new_model_artifact_path:
+    description: 'Path to the new model artifact'
+    type: string
+    required: true
+  prod_model_artifact_path:
+    description: 'Path to the deployed model artifact'
+    type: string
+    required: true
+
+outputs:
+  result:
+    description: 'Result of the comparison (new or old model is better)'
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install tensorflow numpy
+      shell: bash
+
+    - name: Compare models
+      run: |
+        python compare_models.py \
+          --new-model ${{ inputs.new_model_artifact_path }} \
+          --prod-model ${{ inputs.prod_model_artifact_path }}
+      shell: bash
+
+    - name: Output result
+      id: result
+      run: |
+        echo "::set-output name=result::$(cat result.txt)"
+      shell: bash

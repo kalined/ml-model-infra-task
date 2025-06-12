@@ -60,3 +60,61 @@ jobs:
         with:
           name: mnist_model_${{ env.WEEK }}
           path: supported_model/mnist_model.h5
+
+      - name: Get list of artifacts
+        id: get-artifacts
+        run: |
+          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/artifacts > artifacts.json
+
+          # Extract production model artifact ID
+          prod_artifact_id=$(jq -r '
+            .artifacts
+            | map(select(.name | test("^production_")))  # Look for names starting with "production_"
+            | sort_by(.created_at)                       # Sort by creation date
+            | reverse                                    # Reverse to get the latest first
+            | .[0].id //                                # Pick the latest "production_" artifact
+            (.artifacts[] | select(.name == "mnist_model_production") | .id)  # Fallback to "mnist_model_production"
+          ' artifacts.json)
+
+          echo "prod_artifact_id=$prod_artifact_id" >> $GITHUB_ENV
+
+          # Extract latest new model artifact ID
+          new_artifact_id=$(jq -r '
+            .artifacts
+            | map(select(.name | startswith("mnist_model")))  # Look for names starting with "mnist_model"
+            | sort_by(.created_at)                            # Sort by creation date
+            | reverse                                         # Reverse to get the latest first
+            | .[0].id
+          ' artifacts.json)
+
+          echo "new_artifact_id=$new_artifact_id" >> $GITHUB_ENV
+
+      - name: Download production model artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-id: ${{ env.prod_artifact_id }}
+          path: ./prod_model
+
+      - name: Download latest new model artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-id: ${{ env.new_artifact_id }}
+          path: ./new_model
+
+      - name: Evaluate new model
+        id: evaluate-new-model
+        uses: ./.github/actions/evaluate-models
+        with:
+          new_model_artifact_path: ./new_model/mnist_model.h5
+          prod_model_artifact_path: ./prod_model/mnist_model.h5
+
+      - name: Get the result of the evaluation
+        run: |
+          if [ "${{ steps.evaluate-new-model.outputs.result }}" = "old" ]; then
+            echo "::error New model performs worse. Rolling back to the production model."
+            exit 1
+          else
+            echo "New model performs better. You can proceed with the deployment."
+          fi
