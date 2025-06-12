@@ -2,15 +2,27 @@ name: Evaluate Models
 description: Compare the accuracy of the new model and the production model
 
 inputs:
-  new_model_artifact_path:
-    description: 'Path to the new model artifact'
+  new_artifact_id:
+    description: 'ID of the new model artifact'
     type: string
     required: true
-  prod_model_artifact_path:
-    description: 'Path to the deployed model artifact'
+  new_artifact_run_id:
+    description: 'Run ID of the new model artifact'
     type: string
     required: true
-
+  prod_artifact_id:
+    description: 'ID of the production model artifact'
+    type: string
+    required: true
+  prod_artifact_run_id:
+    description: 'Run ID of the production model artifact'
+    type: string
+    required: true
+  github_token:
+    description: 'GitHub token for downloading artifacts'
+    type: string
+    required: true
+    
 outputs:
   result:
     description: 'Result of the comparison (new or old model is better)'
@@ -20,6 +32,22 @@ runs:
   steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Download production model artifact
+      uses: actions/download-artifact@v4
+      with:
+        github-token: ${{ inputs.github_token }}
+        artifact-ids: ${{ inputs.prod_artifact_id }}
+        run-id: ${{ inputs.prod_artifact_run_id }}
+        path: ./prod_model
+
+    - name: Download new model artifact
+      uses: actions/download-artifact@v4
+      with:
+        github-token: ${{ inputs.github_token }}
+        artifact-ids: ${{ inputs.new_artifact_id }}
+        run-id: ${{ inputs.new_artifact_run_id }}
+        path: ./new_model
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -35,8 +63,8 @@ runs:
     - name: Compare models
       run: |
         python ${{ github.action_path }}/compare_models.py \
-          --new-model ${{ inputs.new_model_artifact_path }} \
-          --prod-model ${{ inputs.prod_model_artifact_path }}
+          --new-model ./new_model/mnist_model.h5 \
+          --prod-model ./prod_model/mnist_model.h5
       shell: bash
 
     - name: Output result
