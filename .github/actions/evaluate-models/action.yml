@@ -49,16 +49,40 @@ runs:
         run-id: ${{ inputs.new_artifact_run_id }}
         path: ${{ github.action_path }}/new_model
 
+    - name: Find new model file
+      id: find-new-model
+      run: |
+        NEW_MODEL_PATH=$(find ${{ github.action_path }}/new_model -name "*.h5" | head -n 1)
+        if [ -z "$NEW_MODEL_PATH" ]; then
+          echo "Error: No .h5 file found in new_model directory."
+          exit 1
+        fi
+        echo "new_model_path=$NEW_MODEL_PATH" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Find production model file
+      id: find-prod-model
+      run: |
+        PROD_MODEL_PATH=$(find ${{ github.action_path }}/prod_model -name "*.h5" | head -n 1)
+        if [ -z "$PROD_MODEL_PATH" ]; then
+          echo "Error: No .h5 file found in prod_model directory."
+          exit 1
+        fi
+        echo "prod_model_path=$PROD_MODEL_PATH" >> $GITHUB_ENV
+      shell: bash
+
     - name: Debug new model artifact
       run: |
         echo "Contents of new_model directory:"
         ls -la ${{ github.action_path }}/new_model
+        echo "New model path: ${{ env.new_model_path }}"
       shell: bash
 
     - name: Debug production model artifact
       run: |
         echo "Contents of prod_model directory:"
         ls -la ${{ github.action_path }}/prod_model
+        echo "Production model path: ${{ env.prod_model_path }}"
       shell: bash
 
     - name: Set up Python
@@ -75,8 +99,8 @@ runs:
     - name: Compare models
       run: |
         python ${{ github.action_path }}/compare_models.py \
-          --new-model ${{ github.action_path }}/new_model/mnist_model.h5 \
-          --prod-model ${{ github.action_path }}/prod_model/mnist_model.h5
+          --new-model ${{ env.new_model_path }} \
+          --prod-model ${{ env.prod_model_path }}
       shell: bash
 
     - name: Output result
