@@ -129,28 +129,16 @@ jobs:
 
           echo "new_artifact_id=$new_artifact_id" >> $GITHUB_ENV
           echo "new_artifact_run_id=$new_artifact_run_id" >> $GITHUB_ENV
-      - name: Download production model artifact
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ secrets.GH_PAT }}
-          artifact-ids: ${{ env.prod_artifact_id }}
-          run-id: ${{ env.prod_artifact_run_id }}
-          path: ./prod_model
-
-      - name: Download latest new model artifact
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ secrets.GH_PAT }}
-          artifact-ids: ${{ env.new_artifact_id }}
-          run-id: ${{ env.new_artifact_run_id }}
-          path: ./new_model
 
       - name: Evaluate new model
         id: evaluate-new-model
         uses: ./.github/actions/evaluate-models
         with:
-          new_model_artifact_path: ./new_model/mnist_model.h5
-          prod_model_artifact_path: ./prod_model/mnist_model.h5
+          new_artifact_id: ${{ env.new_artifact_id }}
+          prod_artifact_id: ${{ env.prod_artifact_id }}
+          prod_artifact_run_id: ${{ env.prod_artifact_run_id }}
+          new_artifact_run_id: ${{ env.new_artifact_run_id }}
+          github_token: ${{ secrets.GH_PAT }}
 
       - name: Get the result of the evaluation
         run: |
