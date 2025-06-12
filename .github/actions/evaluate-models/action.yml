@@ -34,7 +34,7 @@ runs:
 
     - name: Compare models
       run: |
-        python compare_models.py \
+        python ${{ github.action_path }}/compare_models.py \
           --new-model ${{ inputs.new_model_artifact_path }} \
           --prod-model ${{ inputs.prod_model_artifact_path }}
       shell: bash
