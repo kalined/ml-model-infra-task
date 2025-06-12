@@ -106,5 +106,5 @@ runs:
     - name: Output result
       id: result
       run: |
-        echo "::set-output name=result::$(cat result.txt)"
+        echo "name=result::$(cat result.txt)" >> $GITHUB_OUTPUT
       shell: bash
