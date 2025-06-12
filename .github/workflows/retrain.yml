@@ -107,13 +107,13 @@ jobs:
       - name: Download production model artifact
         uses: actions/download-artifact@v4
         with:
-          artifact-id: ${{ env.prod_artifact_id }}
+          artifact-ids: ${{ env.prod_artifact_id }}
           path: ./prod_model
 
       - name: Download latest new model artifact
         uses: actions/download-artifact@v4
         with:
-          artifact-id: ${{ env.new_artifact_id }}
+          artifact-ids: ${{ env.new_artifact_id }}
           path: ./new_model
 
       - name: Evaluate new model
