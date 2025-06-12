@@ -99,8 +99,8 @@ runs:
     - name: Compare models
       run: |
         python ${{ github.action_path }}/compare_models.py \
-          --new-model ${{ env.new_model_path }} \
-          --prod-model ${{ env.prod_model_path }}
+          --new-model "${{ env.new_model_path }}" \
+          --prod-model "${{ env.prod_model_path }}"
       shell: bash
 
     - name: Output result
