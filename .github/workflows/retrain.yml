@@ -2,9 +2,9 @@ name: Retrain MNIST Model
 
 on:
   pull_request:
-#    paths:
-#      - 'notebook-mnist.ipynb'
-#      - 'mnist_model/**'
+    paths:
+      - 'notebook-mnist.ipynb'
+      - 'mnist_images/**'
 
 jobs:
   retrain:
@@ -59,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mnist_model_${{ env.WEEK }}
-          path: mnist_model.h5
+          path: supported_model/mnist_model.h5
