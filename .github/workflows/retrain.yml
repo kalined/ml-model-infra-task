@@ -69,50 +69,75 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/actions/artifacts > artifacts.json
 
-          cat artifacts.json
-
           # production model artifact
-          prod_artifact_id=$(
-            jq -r '
-              .artifacts
-              | map(select(.name | test("_production")))
-              | max_by(.created_at)
-              | .id
-            ' artifacts.json
-          )
+          prod_artifact=$(jq -r '
+            .artifacts
+            | map(select(.name | test("_production")))
+            | sort_by(.created_at)
+            | reverse
+            | .[0]
+          ' artifacts.json)
 
-          # new model artifact (anything starting “mnist_model”)
-          new_artifact_id=$(
-            jq -r '
-              .artifacts
-              | map(select(.name | startswith("mnist_model")))
-              | max_by(.created_at)
-              | .id
-            ' artifacts.json
-          )
+          prod_artifact_id=$(echo "$prod_artifact" | jq -r '.id')
 
           if [ -z "$prod_artifact_id" ]; then
             echo "Error: No production artifact found."
             exit 1
           fi
 
+          # Extract artifact details for debugging
+          prod_artifact_name=$(echo "$prod_artifact" | jq -r '.name')
+          prod_artifact_created_at=$(echo "$prod_artifact" | jq -r '.created_at')
+          prod_artifact_run_id=$(echo "$prod_artifact" | jq -r '.workflow_run.id')
+
+          echo "Selected production artifact:"
+          echo "  ID: $prod_artifact_id"
+          echo "  Name: $prod_artifact_name"
+          echo "  Created At: $prod_artifact_created_at"
+          echo "  Workflow Run ID: $prod_artifact_run_id"
+
+          echo "prod_artifact_id=$prod_artifact_id" >> $GITHUB_ENV
+
+          # new model artifact (anything starting with "mnist_model")
+          new_artifact=$(jq -r '
+            .artifacts
+            | map(select(.name | startswith("mnist_model")))
+            | sort_by(.created_at)
+            | reverse
+            | .[0]
+          ' artifacts.json)
+
+          new_artifact_id=$(echo "$new_artifact" | jq -r '.id')
+
           if [ -z "$new_artifact_id" ]; then
             echo "Error: No new model artifact found."
             exit 1
           fi
 
-          echo "prod_artifact_id=$prod_artifact_id" >> $GITHUB_ENV
-          echo "new_artifact_id=$new_artifact_id" >> $GITHUB_ENV
+          # Extract artifact details for debugging
+          new_artifact_name=$(echo "$new_artifact" | jq -r '.name')
+          new_artifact_created_at=$(echo "$new_artifact" | jq -r '.created_at')
+          new_artifact_run_id=$(echo "$new_artifact" | jq -r '.workflow_run.id')
 
+          # Print artifact details
+          echo "Selected new model artifact:"
+          echo "  ID: $new_artifact_id"
+          echo "  Name: $new_artifact_name"
+          echo "  Created At: $new_artifact_created_at"
+          echo "  Workflow Run ID: $new_artifact_run_id"
+
+          echo "new_artifact_id=$new_artifact_id" >> $GITHUB_ENV
       - name: Download production model artifact
         uses: actions/download-artifact@v4
         with:
+          github-token: ${{ secrets.GH_PAT }}
           artifact-ids: ${{ env.prod_artifact_id }}
           path: ./prod_model
 
       - name: Download latest new model artifact
         uses: actions/download-artifact@v4
         with:
+          github-token: ${{ secrets.GH_PAT }}
           artifact-ids: ${{ env.new_artifact_id }}
           path: ./new_model
 
