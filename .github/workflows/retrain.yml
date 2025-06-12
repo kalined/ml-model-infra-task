@@ -97,6 +97,7 @@ jobs:
           echo "  Workflow Run ID: $prod_artifact_run_id"
 
           echo "prod_artifact_id=$prod_artifact_id" >> $GITHUB_ENV
+          echo "prod_artifact_run_id=$prod_artifact_run_id" >> $GITHUB_ENV
 
           # new model artifact (anything starting with "mnist_model")
           new_artifact=$(jq -r '
@@ -127,11 +128,13 @@ jobs:
           echo "  Workflow Run ID: $new_artifact_run_id"
 
           echo "new_artifact_id=$new_artifact_id" >> $GITHUB_ENV
+          echo "new_artifact_run_id=$new_artifact_run_id" >> $GITHUB_ENV
       - name: Download production model artifact
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GH_PAT }}
           artifact-ids: ${{ env.prod_artifact_id }}
+          run-id: ${{ env.prod_artifact_run_id }}
           path: ./prod_model
 
       - name: Download latest new model artifact
@@ -139,6 +142,7 @@ jobs:
         with:
           github-token: ${{ secrets.GH_PAT }}
           artifact-ids: ${{ env.new_artifact_id }}
+          run-id: ${{ env.new_artifact_run_id }}
           path: ./new_model
 
       - name: Evaluate new model
