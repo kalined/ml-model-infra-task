@@ -73,7 +73,7 @@ jobs:
 
           # Extract production model artifact ID
           prod_artifact_id=$(jq -r '
-            .artifacts
+            .artifacts // []
             | map(select(.name | test("^production_")))
             | sort_by(.created_at)
             | reverse
@@ -90,7 +90,7 @@ jobs:
 
           # Extract latest new model artifact ID
           new_artifact_id=$(jq -r '
-            .artifacts
+            .artifacts // []
             | map(select(.name | startswith("mnist_model")))
             | sort_by(.created_at)
             | reverse
