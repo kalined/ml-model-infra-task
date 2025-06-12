@@ -1,0 +1,110 @@
+name: Evaluate Models
+description: Compare the accuracy of the new model and the production model
+
+inputs:
+  new_artifact_id:
+    description: 'ID of the new model artifact'
+    type: string
+    required: true
+  new_artifact_run_id:
+    description: 'Run ID of the new model artifact'
+    type: string
+    required: true
+  prod_artifact_id:
+    description: 'ID of the production model artifact'
+    type: string
+    required: true
+  prod_artifact_run_id:
+    description: 'Run ID of the production model artifact'
+    type: string
+    required: true
+  github_token:
+    description: 'GitHub token for downloading artifacts'
+    type: string
+    required: true
+    
+outputs:
+  result:
+    value: ${{ steps.result-step.outputs.result }}
+    description: 'Result of the comparison (new or old model is better)'
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download production model artifact
+      uses: actions/download-artifact@v4
+      with:
+        github-token: ${{ inputs.github_token }}
+        artifact-ids: ${{ inputs.prod_artifact_id }}
+        run-id: ${{ inputs.prod_artifact_run_id }}
+        path: ${{ github.action_path }}/prod_model
+
+    - name: Download new model artifact
+      uses: actions/download-artifact@v4
+      with:
+        github-token: ${{ inputs.github_token }}
+        artifact-ids: ${{ inputs.new_artifact_id }}
+        run-id: ${{ inputs.new_artifact_run_id }}
+        path: ${{ github.action_path }}/new_model
+
+    - name: Find new model file
+      id: find-new-model
+      run: |
+        NEW_MODEL_PATH=$(find ${{ github.action_path }}/new_model -name "*.h5" | head -n 1)
+        if [ -z "$NEW_MODEL_PATH" ]; then
+          echo "Error: No .h5 file found in new_model directory."
+          exit 1
+        fi
+        echo "new_model_path=$NEW_MODEL_PATH" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Find production model file
+      id: find-prod-model
+      run: |
+        PROD_MODEL_PATH=$(find ${{ github.action_path }}/prod_model -name "*.h5" | head -n 1)
+        if [ -z "$PROD_MODEL_PATH" ]; then
+          echo "Error: No .h5 file found in prod_model directory."
+          exit 1
+        fi
+        echo "prod_model_path=$PROD_MODEL_PATH" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Debug new model artifact
+      run: |
+        echo "Contents of new_model directory:"
+        ls -la ${{ github.action_path }}/new_model
+        echo "New model path: ${{ env.new_model_path }}"
+      shell: bash
+
+    - name: Debug production model artifact
+      run: |
+        echo "Contents of prod_model directory:"
+        ls -la ${{ github.action_path }}/prod_model
+        echo "Production model path: ${{ env.prod_model_path }}"
+      shell: bash
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install tensorflow numpy
+      shell: bash
+
+    - name: Compare models
+      run: |
+        python ${{ github.action_path }}/compare_models.py \
+          --new-model "${{ env.new_model_path }}" \
+          --prod-model "${{ env.prod_model_path }}"
+      shell: bash
+
+    - name: Output result
+      id: result-step
+      run: echo "result=$(cat result.txt)" >> $GITHUB_OUTPUT
+      shell: bash
