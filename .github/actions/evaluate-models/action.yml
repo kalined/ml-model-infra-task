@@ -39,7 +39,7 @@ runs:
         github-token: ${{ inputs.github_token }}
         artifact-ids: ${{ inputs.prod_artifact_id }}
         run-id: ${{ inputs.prod_artifact_run_id }}
-        path: ./prod_model
+        path: ${{ github.action_path }}/prod_model
 
     - name: Download new model artifact
       uses: actions/download-artifact@v4
@@ -47,7 +47,7 @@ runs:
         github-token: ${{ inputs.github_token }}
         artifact-ids: ${{ inputs.new_artifact_id }}
         run-id: ${{ inputs.new_artifact_run_id }}
-        path: ./new_model
+        path: ${{ github.action_path }}/new_model
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -63,8 +63,8 @@ runs:
     - name: Compare models
       run: |
         python ${{ github.action_path }}/compare_models.py \
-          --new-model ./new_model/mnist_model.h5 \
-          --prod-model ./prod_model/mnist_model.h5
+          --new-model ${{ github.action_path }}/new_model/mnist_model.h5 \
+          --prod-model ${{ github.action_path }}/prod_model/mnist_model.h5
       shell: bash
 
     - name: Output result
