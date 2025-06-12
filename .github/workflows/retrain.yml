@@ -64,6 +64,7 @@ jobs:
       - name: Get list of artifacts
         id: get-artifacts
         run: |
+          # Fetch the list of artifacts from the GitHub API
           curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/actions/artifacts > artifacts.json
@@ -71,23 +72,33 @@ jobs:
           # Extract production model artifact ID
           prod_artifact_id=$(jq -r '
             .artifacts
-            | map(select(.name | test("^production_")))  # Look for names starting with "production_"
-            | sort_by(.created_at)                       # Sort by creation date
-            | reverse                                    # Reverse to get the latest first
-            | .[0].id //                                # Pick the latest "production_" artifact
-            (.artifacts[] | select(.name == "mnist_model_production") | .id)  # Fallback to "mnist_model_production"
+            | map(select(.name | test("^production_")))
+            | sort_by(.created_at)
+            | reverse
+            | .[0].id //
+            (.artifacts[] | select(.name == "mnist_model_production") | .id)
           ' artifacts.json)
+
+          if [ -z "$prod_artifact_id" ]; then
+            echo "Error: No production artifact found."
+            exit 1
+          fi
 
           echo "prod_artifact_id=$prod_artifact_id" >> $GITHUB_ENV
 
           # Extract latest new model artifact ID
           new_artifact_id=$(jq -r '
             .artifacts
-            | map(select(.name | startswith("mnist_model")))  # Look for names starting with "mnist_model"
-            | sort_by(.created_at)                            # Sort by creation date
-            | reverse                                         # Reverse to get the latest first
+            | map(select(.name | startswith("mnist_model")))
+            | sort_by(.created_at)
+            | reverse
             | .[0].id
           ' artifacts.json)
+
+          if [ -z "$new_artifact_id" ]; then
+            echo "Error: No new model artifact found."
+            exit 1
+          fi
 
           echo "new_artifact_id=$new_artifact_id" >> $GITHUB_ENV
 
