@@ -49,6 +49,18 @@ runs:
         run-id: ${{ inputs.new_artifact_run_id }}
         path: ${{ github.action_path }}/new_model
 
+    - name: Debug new model artifact
+      run: |
+        echo "Contents of new_model directory:"
+        ls -la ${{ github.action_path }}/new_model
+      shell: bash
+
+    - name: Debug production model artifact
+      run: |
+        echo "Contents of prod_model directory:"
+        ls -la ${{ github.action_path }}/prod_model
+      shell: bash
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
