@@ -1,0 +1,68 @@
+name: Build, train, scan and deploy the model 
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_train:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Determine latest week
+        id: pick_week
+        run: |
+          latest=$(ls mnist_images/weeks \
+                   | grep -E '^week [0-9]+' \
+                   | sort -V \
+                   | tail -n1)
+          echo "WEEK=$latest" >> $GITHUB_ENV
+
+      - name: Check contents of latest week
+        run: |
+          echo "Checking contents of ./mnist_images/weeks/${{ env.WEEK }}/"
+          ls -la "./mnist_images/weeks/${{ env.WEEK }}/"
+
+      - name: Unpack images into latest week
+        run: |
+          rm -f "./mnist_images/weeks/${{ env.WEEK }}/.gitkeep"
+
+          tar --strip-components=1 -xf "./mnist_images/weeks/${{ env.WEEK }}/mnist-images.tar.gz" -C "./mnist_images/weeks/${{ env.WEEK }}/"
+
+          echo "Contents of ./mnist_images/weeks/${{ env.WEEK }}/ after extraction:"
+          ls -la "./mnist_images/weeks/${{ env.WEEK }}/"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with: 
+            python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install notebook papermill
+
+      - name: Execute notebook on ${{ env.WEEK }}
+        run: |
+          papermill notebook-mnist.ipynb \
+                    retrained.ipynb \
+                    -p WEEK "${{ env.WEEK }}" \
+                    --log-output
+        shell: bash
+
+      - name: Upload retrained model
+        uses: actions/upload-artifact@v4
+        with:
+          name: mnist_model_${{ env.WEEK }}_production
+          path: supported_model/mnist_model.h5
+
+      - name: Docker image build
+        id: docker-image-build
+        uses: ./.github/actions/demo-docker-build@main
+        with:
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_token: ${{ secrets.DOCKER_TOKEN }}
