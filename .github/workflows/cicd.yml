@@ -62,7 +62,7 @@ jobs:
 
       - name: Docker image build
         id: docker-image-build
-        uses: ./.github/actions/demo-docker-build@main
+        uses: ./.github/actions/demo-docker-build
         with:
           docker_username: ${{ secrets.DOCKER_USERNAME }}
           docker_token: ${{ secrets.DOCKER_TOKEN }}
