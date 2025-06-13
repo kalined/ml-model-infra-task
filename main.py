@@ -24,5 +24,6 @@ async def predict(file: UploadFile = File(...)):
     img_array = np.expand_dims(img_array, axis=0)  # shape = (1, 28, 28)
 
     predictions = model.predict(img_array)
+    print(predictions)
     predicted_class = np.argmax(predictions, axis=1)[0]
-    return {int(predicted_class)}
+    return {"predicted_class": int(predicted_class)}
