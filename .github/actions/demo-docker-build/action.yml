@@ -8,6 +8,12 @@ inputs:
   docker_token:
     description: "Docker Token"
     required: true
+  docker_image_name:
+    description: 'Docker Image Name'
+    required: true
+  docker_image_tag:
+    description: 'Docker Image Tag'
+    required: true
 
 runs:
   using: "composite"
@@ -30,4 +36,4 @@ runs:
       with:
         context: .
         push: true
-        tags: kalined/ml-app-demo:latest
+        tags: ${{ inputs.docker_image_name }}:${{ inputs.docker_image_tag }}
