@@ -4,7 +4,7 @@ name: Train MNIST Model Manually
 on:
   pull_request:
     paths:
-      - 'notebook-mnist.ipynb'
+      - 'notebooks/**'
       - 'mnist_model/**'
   workflow_dispatch:
     inputs:
@@ -55,7 +55,7 @@ jobs:
       - name: Execute notebook ${{ github.event.inputs.week }}
         run: |
           papermill \
-            notebook-mnist.ipynb \
+            notebooks/notebook-mnist.ipynb \
             retrained.ipynb \
             --log-output
         shell: bash
