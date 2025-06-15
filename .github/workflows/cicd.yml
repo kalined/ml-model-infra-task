@@ -73,7 +73,7 @@ jobs:
         uses: ./.github/actions/demo-docker-build
         with:
           docker_image_name: ${{ env.DOCKER_IMAGE }}
-          docker_image_tag: ${{ env.RUN_NUMBER }}
+          docker_image_tag: v${{ env.RUN_NUMBER }}
           docker_username: ${{ secrets.DOCKER_USERNAME }}
           docker_token: ${{ secrets.DOCKER_TOKEN }}
 
@@ -87,7 +87,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: 'docker.io/${{ env.DOCKER_IMAGE }}:${{ needs.build_train.outputs.run_number }}'
+          image-ref: 'docker.io/${{ env.DOCKER_IMAGE }}:v${{ needs.build_train.outputs.run_number }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
         env:
@@ -117,10 +117,41 @@ jobs:
 
     - name: Start Minikube (Docker driver)
       run: |
-        minikube start --driver=docker --cpus=2 --memory=4096
+        minikube start --driver=docker
         kubectl config use-context minikube
 
     - uses: azure/setup-helm@v4.3.0
       id: install
       with:
         version: 'latest'
+   
+    - name: Deploy project with Helm
+      run: |
+        helm upgrade \
+          --install \
+          --set image.tag=v${{ needs.build.outputs.run_number }} \
+          --set image.repository=docker.io/${{ env.DOCKER_IMAGE }} \
+          --set livenessProbe.httpGet.path=/liveness \
+          --set readinessProbe.httpGet.path=/readiness \
+          ml-predict ml-predict
+
+    - name: Install curl and jq
+      run: sudo apt-get update && sudo apt-get install -y curl jq
+
+    - name: Test application
+      run: |
+        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=ml-predict --timeout=120s
+
+        # Port-forward the service
+        kubectl port-forward svc/ml-predict 8000:8000 &
+
+        # Wait for port-forwarding to start
+        sleep 5
+
+        # Test the /predict endpoint
+        curl -s -X POST "http://localhost:8000/predict" \
+          -H "Content-Type: multipart/form-data" \
+          -F "file=@images/$IMAGE" | jq
+      shell: bash
+      env:
+        IMAGE: ${{ vars.MNIST_IMAGE_FILE_NAME }} # 00443_label_1.png
