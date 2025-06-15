@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'notebooks/**'
+      - 'mnist_images/**'
+      - 'ml-predict/**'
+      - '.github/workflows/cicd.yml'
 
 env:
   DOCKER_IMAGE: "kalined/ml-app-demo"
