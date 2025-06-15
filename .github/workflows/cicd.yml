@@ -161,4 +161,4 @@ jobs:
           -F "file=@images/$IMAGE" | jq
       shell: bash
       env:
-        IMAGE: ${{ vars.MNIST_IMAGE_FILE_NAME }} # 00443_label_1.png
+        IMAGE: ${{ vars.MNIST_IMAGE_FILE_NAME }}
