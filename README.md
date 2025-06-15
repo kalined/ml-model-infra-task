@@ -89,7 +89,7 @@ Below are Mermaid diagrams that illustrate the logic of the pipeline. It consist
 
 ## Bonus
 
-Images downloaded from the AWS S3 bucket and located in the repository under the `images/bonus` came damaged - they are a set of random white, black, and gray pixels instead of resembling MNIST-like handwritten digits. If we train the model on such data this will lead to the issues, like poor performance, overfitting (model will learn pattern form the incorrect data - noise), it will waste resources and could cause deplyment risk.
+Images downloaded from the AWS S3 bucket and located in the repository under the [images/bonus](./images/bonus) came damaged - they are a set of random white, black, and gray pixels instead of resembling MNIST-like handwritten digits. If we train the model on such data this will lead to the issues, like poor performance, overfitting (model will learn pattern form the incorrect data - noise), it will waste resources and could cause deplyment risk.
 
 The possible solutions could be:
 
