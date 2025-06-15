@@ -8,6 +8,7 @@
 - [Pipeline Diagram](#pipeline-diagram)
   - [Model Retraining and Evaluation](#1-model-retraining-and-evaluation)
   - [Model Training, Building, Image Scanning and Deployment](#2-model-training-building-image-scanning-and-deployment-to-the-local-kubernetes-cluster)
+- [Bonus](#bonus)
 
 ---
 
@@ -85,3 +86,14 @@ Below are Mermaid diagrams that illustrate the logic of the pipeline. It consist
         style J fill:#9f9,stroke:#333,stroke-width:2px,color:#000
         style K fill:#9f9,stroke:#333,stroke-width:2px,color:#000
 ```
+
+## Bonus
+
+Images downloaded from the AWS S3 bucket and located in the repository under the `images/bonus` came damaged - they are a set of random white, black, and gray pixels instead of resembling MNIST-like handwritten digits. If we train the model on such data this will lead to the issues, like poor performance, overfitting (model will learn pattern form the incorrect data - noise), it will waste resources and could cause deplyment risk.
+
+The possible solutions could be:
+
+1. Already implemented model retraining which would be added as a mandatory check, additional rules to prevent from merges to the default branch.
+2. Data verification and inspection vefore training to ensure it matches the expected format and quality (check with matplotlib, check dimensions, pixel values).
+3. The dataset should be checked, if the number of the corrupted data isn't huge, it's then possible to apply data augmentation, generate synthetic data or simply combine it with already existing data from other weeks.
+4. Important part in such scenarions is communication. If the dataset is provided by a third party or some team the issue should be reported to the provider and request a corrected dataset.
