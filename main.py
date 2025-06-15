@@ -5,12 +5,22 @@ import tensorflow as tf
 
 from PIL import Image, ImageOps
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Response
 
 # Load the trained TensorFlow model
 model = tf.keras.models.load_model('./supported_model/mnist_model.h5')
 
 app = FastAPI()
+
+@app.get("/liveness")
+async def liveness_probe(response: Response):
+    response.status_code = 200
+    return {"status": "alive"}
+
+@app.get("/readiness")
+async def readiness_probe(response: Response):
+    response.status_code = 200
+    return {"status": "ready"}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
