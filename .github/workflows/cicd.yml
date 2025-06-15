@@ -56,7 +56,7 @@ jobs:
 
       - name: Execute notebook on ${{ env.WEEK }}
         run: |
-          papermill notebook-mnist.ipynb \
+          papermill notebooks/notebook-mnist.ipynb \
                     retrained.ipynb \
                     -p WEEK "${{ env.WEEK }}" \
                     --log-output
