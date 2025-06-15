@@ -129,7 +129,7 @@ jobs:
       run: |
         helm upgrade \
           --install \
-          --set image.tag=v${{ needs.build.outputs.run_number }} \
+          --set image.tag=v${{ needs.build_train.outputs.run_number }} \
           --set image.repository=docker.io/${{ env.DOCKER_IMAGE }} \
           --set livenessProbe.httpGet.path=/liveness \
           --set readinessProbe.httpGet.path=/readiness \
