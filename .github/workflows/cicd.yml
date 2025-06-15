@@ -96,7 +96,7 @@ jobs:
 
   create-cluster-deploy:
     runs-on: ubuntu-latest
-    needs: scan
+    needs: [scan, build_train]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
