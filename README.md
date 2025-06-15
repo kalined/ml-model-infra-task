@@ -1,6 +1,6 @@
 # Machine Learning MNIST Model and Pipeline 🚀
 
-![Build, train, scan and deploy the model](https://github.com/kalined/ml-model-infra-task/actions/workflows/cicd.yml/badge.svg)
+[![Build, train, scan and deploy the model](https://github.com/kalined/ml-model-infra-task/actions/workflows/cicd.yml/badge.svg)](https://github.com/kalined/ml-model-infra-task/actions/workflows/cicd.yml)
 
 ## Table of Contents
 - [Overview](#overview)
