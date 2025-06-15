@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY main.py /app/main.py
+COPY src/main.py /app/main.py
 
 COPY supported_model/mnist_model.h5 /app/supported_model/mnist_model.h5
 
