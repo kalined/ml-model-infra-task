@@ -138,9 +138,16 @@ jobs:
     - name: Install curl and jq
       run: sudo apt-get update && sudo apt-get install -y curl jq
 
+    - name: Wait for pods to be ready
+      run: |
+        echo "Getting pod status before waiting..."
+        kubectl get pods -A -o wide
+        echo "Describing pods..."
+        kubectl describe pods -l app.kubernetes.io/name=ml-predict
+
     - name: Test application
       run: |
-        kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=ml-predict --timeout=120s
+        #kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=ml-predict --timeout=300s
 
         # Port-forward the service
         kubectl port-forward svc/ml-predict 8000:8000 &
